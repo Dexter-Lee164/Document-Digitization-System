@@ -1,0 +1,16 @@
+<%- include('partials/head') %>
+<div class="dv-page-head">
+  <div>
+    <h1>History</h1>
+    <p>Every processing run and every Word file you have created.</p>
+  </div>
+</div>
+
+<div class="dv-seg mb-3" role="radiogroup" aria-label="History type">
+  <input type="radio" name="htab" id="h-jobs" value="jobs" checked><label for="h-jobs">Processing runs</label>
+  <input type="radio" name="htab" id="h-exports" value="exports"><label for="h-exports">Word exports</label>
+</div>
+
+<section class="dv-panel" id="panel-jobs"><div id="jobs-body" aria-live="polite"></div><div class="dv-pager d-none" id="jobs-pager"></div></section>
+<section class="dv-panel d-none" id="panel-exports"><div id="exports-body" aria-live="polite"></div><div class="dv-pager d-none" id="exports-pager"></div></section>
+<%- include('partials/foot', { scripts: ['history.js'] }) %>

@@ -1,0 +1,38 @@
+{
+  "id": "university_registration_v1",
+  "name": "University Student Registration Form (sample template)",
+  "title": "STUDENT REGISTRATION FORM",
+  "description": "Reference template. Regions are relative [x, y, width, height] fractions of the perspective-corrected, upright page, so the template works at any scan resolution as long as the page is flattened first.",
+  "canonical_size": [1240, 1754],
+  "identification": {
+    "region": [0.05, 0.057, 0.90, 0.047],
+    "keywords": ["STUDENT", "REGISTRATION", "FORM"],
+    "min_ratio": 0.66,
+    "psm": 7
+  },
+  "fields": [
+    { "key": "student_name",   "label": "Student Name",   "type": "name",      "region": [0.30, 0.2105, 0.62, 0.0375], "label_xy": [0.08, 0.215], "psm": 7 },
+    { "key": "student_number", "label": "Student Number", "type": "id",        "region": [0.30, 0.2705, 0.40, 0.0375], "label_xy": [0.08, 0.275], "psm": 7, "whitelist": "0123456789-" },
+    { "key": "program",        "label": "Program",        "type": "text",      "region": [0.30, 0.3305, 0.62, 0.0375], "label_xy": [0.08, 0.335], "psm": 7 },
+    { "key": "year_level",     "label": "Year Level",     "type": "text",      "region": [0.30, 0.3905, 0.22, 0.0375], "label_xy": [0.08, 0.395], "psm": 7 },
+    { "key": "section",        "label": "Section",        "type": "text",      "region": [0.675, 0.3905, 0.245, 0.0375], "label_xy": [0.56, 0.395], "psm": 7 },
+    { "key": "date",           "label": "Date",           "type": "date",      "region": [0.30, 0.4505, 0.32, 0.0375], "label_xy": [0.08, 0.455], "psm": 7 },
+    { "key": "contact_number", "label": "Contact Number", "type": "phone",     "region": [0.30, 0.5105, 0.40, 0.0375], "label_xy": [0.08, 0.515], "psm": 7, "whitelist": "0123456789+-()" },
+    { "key": "address",        "label": "Address",        "type": "multiline", "region": [0.30, 0.5705, 0.62, 0.0800], "label_xy": [0.08, 0.575], "psm": 6 }
+  ],
+  "layout": {
+    "institution": { "text": "SAMPLE UNIVERSITY", "y": 0.040 },
+    "title": { "y": 0.078 },
+    "subtitle": { "text": "Academic Year 2026-2027  |  Office of the Registrar", "y": 0.118 },
+    "rule_y": 0.150,
+    "section_heading": { "text": "STUDENT INFORMATION", "y": 0.172 },
+    "instructions_heading": { "text": "INSTRUCTIONS", "y": 0.700 },
+    "instructions": [
+      "1. Fill in all fields using printed capital letters.",
+      "2. Attach a photocopy of your previous semester grades.",
+      "3. Submit this form to the Registrar's Office before the deadline.",
+      "4. Incomplete forms will not be processed."
+    ],
+    "signature_y": 0.905
+  }
+}

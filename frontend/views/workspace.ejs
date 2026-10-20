@@ -1,0 +1,151 @@
+<%- include('partials/head', { pageCss: ['workspace.css'] }) %>
+<div id="ws" data-doc-id="<%= doc.id %>" data-default-preset="<%= settings.default_preset %>">
+  <div class="dv-ws-head">
+    <div class="dv-ws-title">
+      <h1 title="<%= doc.original_filename %>"><%= doc.original_filename %></h1>
+      <div class="meta" id="ws-meta">
+        <span><%= doc.document_type === 'form' ? 'Structured form' : 'General document' %></span>
+        <span class="tnum"><%= doc.image_width %> x <%= doc.image_height %> px</span>
+      </div>
+    </div>
+    <div class="dv-ws-actions">
+      <a class="btn btn-outline-secondary disabled" id="go-review" href="/documents/<%= doc.id %>/review" aria-disabled="true"><i class="bi bi-pencil-square me-1" aria-hidden="true"></i>Review text</a>
+      <a class="btn btn-outline-secondary disabled" id="go-export" href="/documents/<%= doc.id %>/export" aria-disabled="true"><i class="bi bi-file-earmark-word me-1" aria-hidden="true"></i>Export</a>
+    </div>
+  </div>
+
+  <div id="ws-alert" aria-live="polite"></div>
+
+  <div class="dv-ws">
+    <!-- controls -->
+    <div class="dv-ws-col dv-ws-left">
+      <section class="dv-panel dv-controls" aria-label="Processing controls">
+        <details open>
+          <summary>Enhancement</summary>
+          <div class="dv-sec">
+            <div>
+              <label class="form-label" for="doc-type">Document type</label>
+              <select class="form-select" id="doc-type">
+                <option value="general">General document</option>
+                <option value="form">Structured form (template)</option>
+              </select>
+            </div>
+            <div class="dv-preset-list" id="preset-list" role="radiogroup" aria-label="Enhancement preset"></div>
+          </div>
+        </details>
+
+        <details open>
+          <summary>Page geometry</summary>
+          <div class="dv-sec">
+            <div class="dv-switch"><label for="auto-orient">Detect and fix page rotation (OCR orientation)</label><div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="auto-orient" checked></div></div>
+            <div class="dv-switch"><label for="auto-deskew">Straighten small skew</label><div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="auto-deskew" checked></div></div>
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="form-label m-0">Extra rotation</span>
+                <span class="small tnum" id="rot-readout">0&deg;</span>
+              </div>
+              <div class="btn-group w-100" role="group" aria-label="Rotate the page">
+                <button type="button" class="btn btn-outline-secondary" id="rot-left"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>90&deg; left</button>
+                <button type="button" class="btn btn-outline-secondary" id="rot-right"><i class="bi bi-arrow-clockwise me-1" aria-hidden="true"></i>90&deg; right</button>
+              </div>
+              <div class="form-text">Applied after automatic orientation, when you process.</div>
+            </div>
+            <div class="dv-param">
+              <label for="angle">Fine angle (clockwise)<span class="val" id="angle-val">0.0&deg;</span></label>
+              <input class="form-range" type="range" id="angle" min="-15" max="15" step="0.1" value="0">
+            </div>
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-1"><span class="form-label m-0">Page corners</span><span class="dv-badge dv-badge-secondary" id="corner-mode">Not detected yet</span></div>
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-detect"><i class="bi bi-magic me-1" aria-hidden="true"></i>Detect again</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-fullframe"><i class="bi bi-bounding-box me-1" aria-hidden="true"></i>Use whole photo</button>
+              </div>
+              <div class="form-text" id="corner-hint">Drag the numbered handles on the original photo. Use keys 1-4 to pick a corner and the arrow keys to nudge it.</div>
+              <details class="mt-2">
+                <summary class="small fw-semibold" style="padding:0.2rem 0;list-style:revert">Corner coordinates (pixels)</summary>
+                <div class="dv-corner-grid mt-2" id="corner-grid"></div>
+              </details>
+            </div>
+          </div>
+        </details>
+
+        <details id="params-details">
+          <summary>Fine-tune enhancement</summary>
+          <div class="dv-sec">
+            <p class="small text-slate m-0" id="params-note">These are the settings the selected preset uses. Choose Custom to change them.</p>
+            <div id="params" class="d-grid gap-3"></div>
+          </div>
+        </details>
+
+        <details open>
+          <summary>Text recognition</summary>
+          <div class="dv-sec">
+            <div class="dv-switch"><label for="run-ocr">Read the text after processing</label><div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="run-ocr" checked></div></div>
+            <div>
+              <label class="form-label" for="psm">Page layout</label>
+              <select class="form-select" id="psm">
+                <option value="3">Automatic - full page of text</option>
+                <option value="4">One column of text of varying sizes (forms)</option>
+                <option value="6">One uniform block of text</option>
+                <option value="11">Sparse text - find as much as possible</option>
+              </select>
+            </div>
+          </div>
+        </details>
+
+        <div class="dv-sec dv-actions" style="padding-top:1rem;border-top:1px solid var(--dv-line)">
+          <div class="dv-pending d-none" id="pending-note"><i class="bi bi-arrow-repeat" aria-hidden="true"></i><span>Settings changed. Process again to apply them.</span></div>
+          <button type="button" class="btn btn-primary btn-lg" id="btn-process"><i class="bi bi-play-fill me-1" aria-hidden="true"></i>Process document</button>
+          <button type="button" class="btn btn-outline-secondary" id="btn-enhance-only" disabled title="Keeps the straightened page and only re-runs enhancement and OCR.">Re-run enhancement only</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- viewer -->
+    <div class="dv-ws-col dv-ws-center">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div class="dv-seg" role="radiogroup" aria-label="Layout of the views">
+          <input type="radio" name="viewmode" id="vm-split" value="split" checked><label for="vm-split">Side by side</label>
+          <input type="radio" name="viewmode" id="vm-original" value="original"><label for="vm-original">Original</label>
+          <input type="radio" name="viewmode" id="vm-result" value="result"><label for="vm-result">Result</label>
+        </div>
+        <div class="small" id="corner-status" role="status"></div>
+      </div>
+      <div class="dv-viewer-wrap" id="viewer-wrap" data-mode="split">
+        <div class="dv-pane dv-pane-in">
+          <div class="dv-pane-head"><strong>Original photo</strong><span class="small text-slate">Drag the four corners</span></div>
+          <div id="view-in" class="dv-view-host"></div>
+        </div>
+        <div class="dv-pane dv-pane-out">
+          <div class="dv-pane-head">
+            <strong>Result</strong>
+            <div class="dv-seg" role="radiogroup" aria-label="Which result to show">
+              <input type="radio" name="outview" id="ov-enhanced" value="enhanced" checked><label for="ov-enhanced">Enhanced</label>
+              <input type="radio" name="outview" id="ov-corrected" value="corrected"><label for="ov-corrected">Straightened</label>
+            </div>
+          </div>
+          <div id="view-out" class="dv-view-host"></div>
+        </div>
+      </div>
+      <p class="dv-corner-note mb-0">Scroll to zoom, drag the background to pan, double-click to toggle zoom. The enhanced image is exactly what the OCR engine reads.</p>
+    </div>
+
+    <!-- pipeline + report -->
+    <div class="dv-ws-col dv-ws-right">
+      <section class="dv-panel" aria-label="Processing progress">
+        <div class="dv-panel-head"><h2>Pipeline</h2><span id="job-badge"></span></div>
+        <div class="dv-panel-body">
+          <ol class="dv-rail" id="rail"></ol>
+          <div id="job-error" class="dv-notice dv-notice-bad mt-3 d-none" role="alert"></div>
+          <div id="job-done" class="mt-3 d-none"></div>
+          <button type="button" class="btn btn-sm btn-outline-secondary mt-3 d-none" id="btn-ocr-only"><i class="bi bi-fonts me-1" aria-hidden="true"></i>Read the text again</button>
+        </div>
+      </section>
+      <section class="dv-panel" aria-label="Processing report">
+        <div class="dv-panel-head"><h2>Report</h2></div>
+        <div class="dv-panel-body dv-report" id="report"><p class="text-slate small m-0">Details appear here after the page has been processed.</p></div>
+      </section>
+    </div>
+  </div>
+</div>
+<%- include('partials/foot', { scripts: ['crop-editor.js', 'workspace.js'] }) %>

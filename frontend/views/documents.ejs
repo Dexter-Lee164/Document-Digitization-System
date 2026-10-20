@@ -1,0 +1,29 @@
+<%- include('partials/head') %>
+<div class="dv-page-head">
+  <div>
+    <h1>My documents</h1>
+    <p>Everything you have scanned. Open a page to adjust it, review its text or download the Word file.</p>
+  </div>
+  <a class="btn btn-primary" href="/scan/new"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>New scan</a>
+</div>
+
+<section class="dv-panel" id="docs-root">
+  <form class="dv-toolbar" id="filters" role="search" aria-label="Filter documents">
+    <div class="dv-search"><i class="bi bi-search" aria-hidden="true"></i><input class="form-control" type="search" id="f-search" placeholder="Search by file name" aria-label="Search by file name" maxlength="100"></div>
+    <select class="form-select" id="f-status" aria-label="Processing status">
+      <option value="">Any processing status</option><option value="uploaded">Uploaded</option><option value="processing">Processing</option><option value="processed">Processed</option><option value="failed">Failed</option>
+    </select>
+    <select class="form-select" id="f-review" aria-label="Review status">
+      <option value="">Any review status</option><option value="not_started">Not read yet</option><option value="needs_review">Needs review</option><option value="reviewed">Reviewed</option>
+    </select>
+    <select class="form-select" id="f-type" aria-label="Document type">
+      <option value="">Any type</option><option value="general">General document</option><option value="form">Structured form</option>
+    </select>
+    <select class="form-select" id="f-sort" aria-label="Sort order">
+      <option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Name A to Z</option>
+    </select>
+  </form>
+  <div id="docs-body" aria-live="polite"></div>
+  <div class="dv-pager d-none" id="pager"></div>
+</section>
+<%- include('partials/foot', { scripts: ['documents.js'] }) %>

@@ -1,0 +1,69 @@
+<%- include('partials/head', { pageCss: ['workspace.css'] }) %>
+<div id="rv" data-doc-id="<%= doc.id %>">
+  <div class="dv-ws-head">
+    <div class="dv-ws-title">
+      <h1 title="<%= doc.original_filename %>"><%= doc.original_filename %></h1>
+      <div class="meta" id="rv-meta"></div>
+    </div>
+    <div class="dv-ws-actions">
+      <a class="btn btn-outline-secondary" href="/documents/<%= doc.id %>/workspace"><i class="bi bi-sliders me-1" aria-hidden="true"></i>Back to processing</a>
+      <button type="button" class="btn btn-outline-secondary" id="btn-reset" disabled><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Restore OCR text</button>
+      <button type="button" class="btn btn-outline-secondary" id="btn-save" disabled><i class="bi bi-save me-1" aria-hidden="true"></i>Save</button>
+      <button type="button" class="btn btn-success" id="btn-reviewed" disabled><i class="bi bi-check2-circle me-1" aria-hidden="true"></i>Save and mark reviewed</button>
+      <a class="btn btn-primary disabled" id="go-export" href="/documents/<%= doc.id %>/export" aria-disabled="true"><i class="bi bi-file-earmark-word me-1" aria-hidden="true"></i>Export</a>
+    </div>
+  </div>
+
+  <div id="rv-alert" aria-live="polite"></div>
+
+  <div class="dv-review">
+    <section class="dv-panel" aria-label="Page image">
+      <div class="dv-panel-head">
+        <h2>Enhanced page</h2>
+        <div class="d-flex gap-3 flex-wrap">
+          <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="show-low" checked><label class="form-check-label small" for="show-low">Mark uncertain words</label></div>
+          <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="show-all"><label class="form-check-label small" for="show-all">Show every word box</label></div>
+        </div>
+      </div>
+      <div class="dv-panel-body p-2"><div id="rv-view" class="dv-view-host"></div></div>
+    </section>
+
+    <section class="dv-panel" aria-label="Recognised text">
+      <div class="dv-editor-tabs" role="tablist" id="rv-tabs">
+        <button type="button" role="tab" id="tab-text" aria-selected="true" aria-controls="pane-text">Text</button>
+        <button type="button" role="tab" id="tab-fields" aria-selected="false" aria-controls="pane-fields" class="d-none">Form fields</button>
+      </div>
+      <div id="pane-text" role="tabpanel" aria-labelledby="tab-text">
+        <div class="dv-stat-row" id="rv-stats"></div>
+        <div id="rv-form-note" class="p-3 pb-0 d-none"></div>
+        <div class="dv-textbox" id="textbox">
+          <div class="hl" id="hl" aria-hidden="true"></div>
+          <textarea id="text" spellcheck="false" aria-label="Recognised text. Edit it to correct mistakes." disabled></textarea>
+        </div>
+        <div class="dv-lowlist d-none" id="lowlist" aria-label="Words the OCR engine was unsure about"></div>
+        <div class="dv-editor-bar">
+          <span class="text-slate" id="rv-count"></span>
+          <span id="rv-dirty" class="small"></span>
+        </div>
+      </div>
+      <div id="pane-fields" role="tabpanel" aria-labelledby="tab-fields" class="d-none">
+        <div class="p-3 pb-0 small text-slate" id="fields-note"></div>
+        <div class="dv-field-list" id="fields"></div>
+      </div>
+      <div class="dv-editor-bar" style="border-top:1px solid var(--dv-line)">
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <label class="small text-slate m-0" for="rv-psm">Read again with layout</label>
+          <select class="form-select form-select-sm" id="rv-psm" style="width:auto">
+            <option value="3">Automatic</option>
+            <option value="4">One column</option>
+            <option value="6">Uniform block</option>
+            <option value="11">Sparse text</option>
+          </select>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-reocr" disabled>Read again</button>
+        </div>
+        <span class="small text-slate">Ctrl+S saves</span>
+      </div>
+    </section>
+  </div>
+</div>
+<%- include('partials/foot', { scripts: ['crop-editor.js', 'ocr-editor.js'] }) %>

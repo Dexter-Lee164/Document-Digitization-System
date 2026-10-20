@@ -1,0 +1,70 @@
+<%- include('partials/head', { pageCss: ['workspace.css'] }) %>
+<div class="dv-page-head">
+  <div>
+    <h1>DSP lab</h1>
+    <p>Compare how much each processing stage helps the OCR engine on the same photo: time, the engine's confidence and, when you supply the true text, character and word error rates.</p>
+  </div>
+</div>
+
+<div class="row g-3" id="lab">
+  <div class="col-xl-4">
+    <section class="dv-panel">
+      <div class="dv-panel-head"><h2>Experiment setup</h2></div>
+      <div class="dv-panel-body d-grid gap-3">
+        <div>
+          <label class="form-label" for="lab-doc">Photo to test</label>
+          <select class="form-select" id="lab-doc"><option value="">Loading documents...</option></select>
+          <div class="form-text">Experiments always start from the original upload, never from an already processed copy.</div>
+        </div>
+
+        <fieldset>
+          <legend class="form-label">Configurations</legend>
+          <div class="d-grid gap-2">
+            <label class="dv-cfg"><input type="checkbox" name="cfg" value="A" checked><span><strong>A. No preprocessing</strong><small>OCR on the photo exactly as uploaded.</small></span></label>
+            <label class="dv-cfg"><input type="checkbox" name="cfg" value="B" checked><span><strong>B. Geometry only</strong><small>Perspective, rotation and skew corrected. No enhancement.</small></span></label>
+            <label class="dv-cfg"><input type="checkbox" name="cfg" value="C" checked><span><strong>C. Enhancement only</strong><small>Filters and contrast on the photo, without straightening.</small></span></label>
+            <label class="dv-cfg"><input type="checkbox" name="cfg" value="D" checked><span><strong>D. Full pipeline</strong><small>Geometry, then enhancement. What DocuVision normally does.</small></span></label>
+          </div>
+        </fieldset>
+
+        <div class="row g-2">
+          <div class="col-7">
+            <label class="form-label" for="lab-preset">Enhancement for C and D</label>
+            <select class="form-select" id="lab-preset">
+              <option value="document_scan" selected>Document scan</option><option value="automatic">Automatic</option><option value="black_white">Black and white</option><option value="grayscale">Grayscale</option>
+            </select>
+          </div>
+          <div class="col-5">
+            <label class="form-label" for="lab-psm">Layout</label>
+            <select class="form-select" id="lab-psm"><option value="3" selected>Automatic</option><option value="4">One column</option><option value="6">Uniform block</option><option value="11">Sparse</option></select>
+          </div>
+        </div>
+
+        <div>
+          <div class="d-flex justify-content-between align-items-end">
+            <label class="form-label" for="lab-ref">True text of the page (optional)</label>
+            <button type="button" class="btn btn-sm btn-link p-0" id="lab-use-reviewed" disabled>Use my reviewed text</button>
+          </div>
+          <textarea class="form-control" id="lab-ref" rows="6" spellcheck="false" placeholder="Type or paste exactly what the page says. Without it, only time and confidence are reported."></textarea>
+          <div class="form-text">CER and WER compare the OCR output with this text. "Use my reviewed text" is only a fair reference if you corrected every word by hand.</div>
+        </div>
+
+        <div id="lab-error" class="dv-notice dv-notice-bad d-none" role="alert"></div>
+        <button type="button" class="btn btn-primary btn-lg" id="lab-run" disabled>Run experiment</button>
+        <div class="small text-slate d-none" id="lab-progress"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-xl-8">
+    <section class="dv-panel" id="lab-results">
+      <div class="dv-panel-head"><h2>Results</h2><a class="btn btn-sm btn-outline-secondary d-none" id="lab-csv"><i class="bi bi-filetype-csv me-1" aria-hidden="true"></i>Download CSV</a></div>
+      <div id="lab-results-body"><div class="dv-empty"><i class="bi bi-activity" aria-hidden="true"></i><h3>No results yet</h3><p>Choose a photo and run the experiment. Each configuration runs OCR once, so it takes a little while.</p></div></div>
+    </section>
+    <section class="dv-panel mt-3 d-none" id="lab-history-panel">
+      <div class="dv-panel-head"><h2>Earlier runs</h2></div>
+      <div id="lab-history"></div>
+    </section>
+  </div>
+</div>
+<%- include('partials/foot', { scripts: ['lab.js'] }) %>

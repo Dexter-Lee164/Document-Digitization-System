@@ -1,0 +1,21 @@
+# dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# local configuration and data (created at first run)
+.env
+data/
+storage/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+
+# logs / OS
+*.log
+.DS_Store
+Thumbs.db

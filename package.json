@@ -1,0 +1,32 @@
+{
+  "name": "docuvision",
+  "version": "1.0.0",
+  "description": "DocuVision - web-based document enhancement and automated form digitization using digital image processing and OCR",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "backend/server.js",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "setup:env": "node scripts/ensure-env.js",
+    "db:init": "node backend/database/init.js",
+    "start": "node scripts/ensure-env.js && node backend/server.js",
+    "dev": "node scripts/dev.js",
+    "start:cv": "node scripts/start-cv.js",
+    "check": "node scripts/start-cv.js --check",
+    "test": "node --test --test-concurrency=1 --test-reporter=spec \"tests/backend/*.test.js\"",
+    "test:integration": "node --test --test-concurrency=1 --test-reporter=spec \"tests/integration/*.test.js\"",
+    "test:cv": "python -m pytest tests/cv -q"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
+    "dotenv": "^17.2.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "multer": "^2.0.2"
+  }
+}

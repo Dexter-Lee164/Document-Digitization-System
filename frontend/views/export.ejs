@@ -1,0 +1,62 @@
+<%- include('partials/head', { pageCss: ['workspace.css'] }) %>
+<div id="ex" data-doc-id="<%= doc.id %>" data-name="<%= doc.original_filename %>" data-suffix="<%= settings.export_filename_suffix %>" data-reflow="<%= settings.export_reflow %>" data-fulltext="<%= settings.export_include_full_text %>">
+  <div class="dv-page-head">
+    <div>
+      <h1>Export to Word</h1>
+      <p>Create an editable .docx from the text you reviewed. Text is set in Times New Roman 12 pt on A4 paper.</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/documents/<%= doc.id %>/review"><i class="bi bi-pencil-square me-1" aria-hidden="true"></i>Back to review</a>
+  </div>
+
+  <div id="ex-alert" aria-live="polite"></div>
+
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <section class="dv-panel">
+        <div class="dv-panel-head"><h2>Document</h2><span id="ex-badges" class="d-flex gap-2"></span></div>
+        <div class="dv-panel-body">
+          <div class="fw-semibold dv-ellipsis mb-3" title="<%= doc.original_filename %>"><%= doc.original_filename %></div>
+
+          <fieldset class="mb-3">
+            <legend class="form-label">Layout</legend>
+            <div class="dv-choice-group">
+              <label class="dv-choice" id="choice-text"><input type="radio" name="etype" value="text" checked>
+                <span class="dv-choice-body"><strong>Text document</strong><small>All recognised text as paragraphs, using your corrections.</small></span></label>
+              <label class="dv-choice" id="choice-form"><input type="radio" name="etype" value="form">
+                <span class="dv-choice-body"><strong>Form table</strong><small id="form-choice-note">A two-column table of field names and values, followed by any other text.</small></span></label>
+            </div>
+          </fieldset>
+
+          <div class="mb-3">
+            <label class="form-label" for="fname">File name</label>
+            <div class="input-group"><input class="form-control" id="fname" maxlength="100" autocomplete="off"><span class="input-group-text">.docx</span></div>
+            <div class="form-text">Leave it as it is, or type your own name.</div>
+          </div>
+
+          <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" role="switch" id="reflow"><label class="form-check-label" for="reflow">Join lines that were wrapped in the photo into paragraphs</label></div>
+          <div class="form-check form-switch mb-4" id="fulltext-row"><input class="form-check-input" type="checkbox" role="switch" id="fulltext"><label class="form-check-label" for="fulltext">Include the rest of the page text under the table</label></div>
+
+          <div id="ex-error" class="dv-notice dv-notice-bad mb-3 d-none" role="alert"></div>
+          <button type="button" class="btn btn-primary btn-lg w-100" id="btn-create" disabled><i class="bi bi-file-earmark-word me-2" aria-hidden="true"></i>Create Word document</button>
+        </div>
+      </section>
+
+      <section class="dv-panel mt-3 d-none" id="result-panel" aria-live="polite">
+        <div class="dv-panel-head"><h2>Your file is ready</h2></div>
+        <div class="dv-panel-body" id="result-body"></div>
+      </section>
+    </div>
+
+    <div class="col-lg-7">
+      <section class="dv-panel">
+        <div class="dv-panel-head"><h2>Preview</h2><span class="small text-slate">Approximate. Word does the final page layout.</span></div>
+        <div class="dv-panel-body"><div class="dv-paper" id="paper" role="img" aria-label="Preview of the first page of the Word document"></div></div>
+      </section>
+      <section class="dv-panel mt-3">
+        <div class="dv-panel-head"><h2>Earlier exports of this document</h2></div>
+        <div id="history"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<%- include('partials/foot', { scripts: ['export.js'] }) %>

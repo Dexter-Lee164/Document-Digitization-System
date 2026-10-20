@@ -1,0 +1,146 @@
+<%- include('partials/head', { pageCss: ['dashboard.css'] }) %>
+<%
+  const d = data;
+  const total = d.documents.total;
+  const maxDay = Math.max(1, ...d.week.map(function (w) { return w.count; }));
+  const statusLabel = { uploaded: 'Uploaded', processing: 'Processing', processed: 'Processed', failed: 'Failed' };
+  const reviewLabel = { not_started: 'Not read yet', needs_review: 'Needs review', reviewed: 'Reviewed' };
+  const tone = { uploaded: 'secondary', processing: 'primary', processed: 'success', failed: 'danger', not_started: 'secondary', needs_review: 'warning', reviewed: 'success' };
+  function fmtMs(n) { if (n === null || n === undefined) return '-'; return n < 1000 ? n + ' ms' : (n / 1000).toFixed(1) + ' s'; }
+  function dayName(iso) { return new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' }); }
+%>
+<div class="dv-page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <p>What is in your library and what still needs your attention.</p>
+  </div>
+  <a class="btn btn-primary" href="/scan/new"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>New scan</a>
+</div>
+
+<% if (total === 0) { %>
+<section class="dv-panel dv-welcome">
+  <div class="dv-welcome-body">
+    <h2>Scan your first page</h2>
+    <p>Upload a photo of a document or take one with your camera. DocuVision finds the page, straightens it, cleans the image and reads the text. You check the result before exporting a Word file.</p>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-primary" href="/scan/new">Upload or capture a page</a>
+      <a class="btn btn-outline-secondary" href="/scan/new#samples">Try a sample page</a>
+    </div>
+  </div>
+  <ol class="dv-flow" aria-label="How a page is processed">
+    <li><strong>Detect</strong><span>Find the page edges and four corners</span></li>
+    <li><strong>Correct</strong><span>Flatten perspective, fix rotation and skew</span></li>
+    <li><strong>Enhance</strong><span>Remove shadows and noise, lift contrast</span></li>
+    <li><strong>Read</strong><span>Tesseract OCR with confidence per word</span></li>
+    <li><strong>Review</strong><span>Fix mistakes, then export to .docx</span></li>
+  </ol>
+</section>
+<% } else { %>
+
+<section class="dv-ledger" aria-label="Library summary">
+  <a class="dv-ledger-cell" href="/documents">
+    <span class="dv-ledger-value tnum"><%= total %></span>
+    <span class="dv-ledger-label">Documents</span>
+    <span class="dv-ledger-note"><%= d.documents.processed %> processed<% if (d.documents.awaiting) { %>, <%= d.documents.awaiting %> not yet processed<% } %></span>
+  </a>
+  <a class="dv-ledger-cell" href="/documents?review=needs_review">
+    <span class="dv-ledger-value tnum<%= d.documents.needs_review ? ' is-attn' : '' %>"><%= d.documents.needs_review %></span>
+    <span class="dv-ledger-label">Waiting for your review</span>
+    <span class="dv-ledger-note"><%= d.documents.reviewed %> already reviewed</span>
+  </a>
+  <a class="dv-ledger-cell" href="/history">
+    <span class="dv-ledger-value tnum"><%= d.exports.total %></span>
+    <span class="dv-ledger-label">Word exports</span>
+    <span class="dv-ledger-note">from <%= d.exports.documents %> document<%= d.exports.documents === 1 ? '' : 's' %></span>
+  </a>
+  <div class="dv-ledger-cell">
+    <span class="dv-ledger-value tnum"><%= d.ocr.average_confidence === null ? '-' : d.ocr.average_confidence + '%' %></span>
+    <span class="dv-ledger-label">Mean OCR confidence</span>
+    <span class="dv-ledger-note">The engine's own certainty, not measured accuracy</span>
+  </div>
+</section>
+
+<% if (d.documents.failed || d.documents.processing) { %>
+<div class="dv-notice <%= d.documents.failed ? 'dv-notice-warn' : 'dv-notice-info' %> mb-3" role="status">
+  <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+  <div>
+    <% if (d.documents.processing) { %><strong><%= d.documents.processing %> document<%= d.documents.processing === 1 ? ' is' : 's are' %> being processed right now.</strong> <% } %>
+    <% if (d.documents.failed) { %><%= d.documents.failed %> document<%= d.documents.failed === 1 ? '' : 's' %> failed to process. <a href="/documents?status=failed">Open the failed ones</a> to read the reason and try again.<% } %>
+  </div>
+</div>
+<% } %>
+
+<div class="row g-3">
+  <div class="col-xl-8">
+    <section class="dv-panel">
+      <div class="dv-panel-head"><h2>Recent documents</h2><a href="/documents" class="small">View all</a></div>
+      <div class="dv-table-wrap">
+        <table class="dv-table">
+          <thead><tr><th>Document</th><th>Status</th><th>Review</th><th class="num">Confidence</th><th>Added</th><th><span class="visually-hidden">Open</span></th></tr></thead>
+          <tbody>
+          <% d.recent.forEach(function (doc) { %>
+            <tr>
+              <td><a class="dv-link-strong dv-ellipsis" href="/documents/<%= doc.id %>/workspace" title="<%= doc.original_filename %>"><%= doc.original_filename %></a>
+                <div class="small text-slate"><%= doc.document_type === 'form' ? 'Structured form' : 'General document' %></div></td>
+              <td><span class="dv-badge dv-badge-<%= tone[doc.processing_status] %>"><%= statusLabel[doc.processing_status] %></span></td>
+              <td><span class="dv-badge dv-badge-<%= tone[doc.review_status] %>"><%= reviewLabel[doc.review_status] %></span></td>
+              <td class="num"><%= doc.confidence === null || doc.confidence === undefined ? '-' : Math.round(doc.confidence * 10) / 10 + '%' %></td>
+              <td class="text-slate small nowrap" data-ago="<%= doc.created_at %>"><%= doc.created_at.slice(0, 10) %></td>
+              <td class="text-end">
+                <% if (doc.has_enhanced) { %><a class="btn btn-sm btn-outline-secondary" href="/documents/<%= doc.id %>/review">Review text</a>
+                <% } else { %><a class="btn btn-sm btn-outline-secondary" href="/documents/<%= doc.id %>/workspace">Process</a><% } %>
+              </td>
+            </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-xl-4 d-flex flex-column gap-3">
+    <section class="dv-panel">
+      <div class="dv-panel-head"><h2>Uploads, last 7 days</h2></div>
+      <div class="dv-panel-body">
+        <div class="dv-week" role="img" aria-label="Documents uploaded per day for the last seven days: <%= d.week.map(function (w) { return dayName(w.day) + ' ' + w.count; }).join(', ') %>">
+          <% d.week.forEach(function (w) { %>
+            <div class="dv-week-col">
+              <span class="dv-week-n tnum"><%= w.count || '' %></span>
+              <span class="dv-week-bar" style="--h: <%= Math.round((w.count / maxDay) * 100) %>%"></span>
+              <span class="dv-week-d"><%= dayName(w.day) %></span>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+
+    <section class="dv-panel">
+      <div class="dv-panel-head"><h2>Processing</h2><a href="/history" class="small">History</a></div>
+      <div class="dv-panel-body">
+        <dl class="dv-kv mb-3">
+          <dt>Runs</dt><dd><%= d.jobs.total %> (<%= d.jobs.completed %> completed<% if (d.jobs.failed) { %>, <%= d.jobs.failed %> failed<% } %>)</dd>
+          <dt>Average time</dt><dd><%= fmtMs(d.jobs.average_ms) %> per completed run</dd>
+        </dl>
+        <% if (!d.recent_jobs.length) { %><p class="text-slate small mb-0">No runs yet.</p><% } %>
+        <ul class="dv-feed">
+          <% d.recent_jobs.forEach(function (j) { %>
+            <li>
+              <span class="dv-feed-dot dv-feed-<%= j.status %>" aria-hidden="true"></span>
+              <div>
+                <div class="dv-ellipsis small fw-semibold"><%= j.original_filename %></div>
+                <div class="small text-slate">
+                  <%= j.kind === 'ocr' ? 'Text recognition' : 'Full processing' %> -
+                  <% if (j.status === 'completed') { %>finished in <%= fmtMs(j.processing_time_ms) %>
+                  <% } else if (j.status === 'failed') { %>failed
+                  <% } else { %>running (<%= j.stage || 'queued' %>)<% } %>
+                </div>
+              </div>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+<% } %>
+<%- include('partials/foot', { scripts: ['dashboard.js'] }) %>

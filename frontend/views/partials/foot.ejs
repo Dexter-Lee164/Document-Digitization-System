@@ -1,0 +1,23 @@
+  </main>
+</div>
+
+<div id="toast-host" aria-live="polite"></div>
+
+<div class="modal fade" id="confirm-modal" tabindex="-1" aria-labelledby="confirm-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0 pb-0"><h2 class="modal-title fs-5" id="confirm-title">Confirm</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body text-slate"></div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-confirm-ok>Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/main.js"></script>
+<% (locals.scripts || []).forEach(function (s) { %><script src="/static/js/<%= s %>"></script>
+<% }) %></body>
+</html>

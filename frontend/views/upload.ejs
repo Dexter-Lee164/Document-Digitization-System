@@ -1,0 +1,141 @@
+<%- include('partials/head', { pageCss: ['workspace.css'] }) %>
+<div class="dv-page-head">
+  <div>
+    <h1>New scan</h1>
+    <p>Add a photo or scan of one page. You can adjust the page corners and enhancement before the text is read.</p>
+  </div>
+</div>
+
+<ol class="dv-steps" id="scan-steps" aria-label="Progress">
+  <li class="is-active" data-step="1"><span>Choose a page</span></li>
+  <li data-step="2"><span>Pick the document type</span></li>
+  <li data-step="3"><span>Process</span></li>
+</ol>
+
+<div class="row g-3" id="scan-root" data-max-bytes="<%= maxUploadMb * 1024 * 1024 %>" data-max-mb="<%= maxUploadMb %>" data-default-preset="<%= settings.default_preset %>" data-default-type="<%= settings.default_document_type %>">
+  <div class="col-lg-7">
+    <section class="dv-panel">
+      <div class="dv-panel-head">
+        <h2>1. Choose a page</h2>
+        <div class="dv-seg" role="radiogroup" aria-label="Page source">
+          <input type="radio" name="source" id="src-file" value="file" checked><label for="src-file"><i class="bi bi-upload me-1" aria-hidden="true"></i>Upload file</label>
+          <input type="radio" name="source" id="src-camera" value="camera"><label for="src-camera"><i class="bi bi-camera me-1" aria-hidden="true"></i>Use camera</label>
+        </div>
+      </div>
+      <div class="dv-panel-body">
+        <div id="pane-file">
+          <div class="dv-drop" id="dropzone" tabindex="0" role="button" aria-label="Choose an image: drop it here or press Enter to browse">
+            <i class="bi bi-file-earmark-image" aria-hidden="true"></i>
+            <div class="dv-drop-title">Drop an image here</div>
+            <div class="dv-drop-sub">or <span class="dv-drop-browse">browse your files</span></div>
+            <div class="dv-drop-hint">JPEG or PNG, up to <%= maxUploadMb %> MB</div>
+            <input type="file" id="file-input" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden>
+          </div>
+          <div id="file-error" class="dv-notice dv-notice-bad mt-3 d-none" role="alert"></div>
+          <div id="file-card" class="dv-file-card d-none">
+            <img id="file-thumb" alt="Preview of the chosen page" class="dv-file-thumb">
+            <div class="dv-file-meta">
+              <div class="fw-semibold dv-ellipsis" id="file-name"></div>
+              <div class="small text-slate" id="file-info"></div>
+              <div class="small mt-1 d-none" id="file-warning"></div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="file-clear">Remove</button>
+          </div>
+        </div>
+
+        <div id="pane-camera" class="d-none">
+          <div class="dv-cam">
+            <div class="dv-cam-stage">
+              <video id="cam-video" playsinline muted autoplay></video>
+              <div class="dv-cam-guide" aria-hidden="true"></div>
+              <div class="dv-cam-msg" id="cam-msg">Starting the camera...</div>
+            </div>
+            <div class="dv-cam-bar">
+              <select class="form-select form-select-sm" id="cam-device" aria-label="Camera" style="max-width:260px"></select>
+              <button type="button" class="btn btn-primary" id="cam-capture" disabled><i class="bi bi-circle-fill me-2" aria-hidden="true"></i>Capture page</button>
+            </div>
+            <p class="small text-slate mb-0">Lay the page on a flat, evenly lit surface and fit it inside the frame. A phone held at a slight angle is fine, since the corners are corrected afterwards.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="dv-panel mt-3" id="samples">
+      <div class="dv-panel-head"><h2>Try a sample page</h2><span class="small text-slate">Synthetic pages made for testing</span></div>
+      <div class="dv-panel-body">
+        <div class="dv-samples">
+          <button type="button" class="dv-sample" data-sample="letter_photo.jpg" data-type="general" data-name="sample-letter-photo.jpg">
+            <img src="/static/assets/samples/letter_photo.jpg" alt="" loading="lazy">
+            <span><strong>Letter, photographed</strong><small>Shot at an angle on a desk</small></span>
+          </button>
+          <button type="button" class="dv-sample" data-sample="registration_form_photo.jpg" data-type="form" data-name="sample-registration-form-photo.jpg">
+            <img src="/static/assets/samples/registration_form_photo.jpg" alt="" loading="lazy">
+            <span><strong>Registration form, photographed</strong><small>For structured form reading</small></span>
+          </button>
+          <button type="button" class="dv-sample" data-sample="letter_clean.png" data-type="general" data-name="sample-letter-clean.png">
+            <img src="/static/assets/samples/letter_clean.png" alt="" loading="lazy">
+            <span><strong>Letter, flat scan</strong><small>Already upright and even</small></span>
+          </button>
+          <button type="button" class="dv-sample" data-sample="registration_form_clean.png" data-type="form" data-name="sample-registration-form-clean.png">
+            <img src="/static/assets/samples/registration_form_clean.png" alt="" loading="lazy">
+            <span><strong>Registration form, flat scan</strong><small>Reads all eight fields cleanly</small></span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-5">
+    <section class="dv-panel">
+      <div class="dv-panel-head"><h2>2. Document type</h2></div>
+      <div class="dv-panel-body">
+        <div class="dv-choice-group" role="radiogroup" aria-label="Document type">
+          <label class="dv-choice">
+            <input type="radio" name="doctype" value="general" checked>
+            <span class="dv-choice-body">
+              <strong>General document</strong>
+              <small>Letters, notes, printed pages. All text is read and kept in reading order.</small>
+            </span>
+          </label>
+          <label class="dv-choice">
+            <input type="radio" name="doctype" value="form">
+            <span class="dv-choice-body">
+              <strong>Structured form</strong>
+              <small>Reads labelled fields from the built-in Student Registration Form template. A page that does not match is read as general text instead.</small>
+            </span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="dv-panel mt-3">
+      <div class="dv-panel-head"><h2>3. Process</h2></div>
+      <div class="dv-panel-body">
+        <label class="form-label" for="preset">Enhancement</label>
+        <select class="form-select mb-1" id="preset">
+          <option value="automatic">Automatic - measures the page and chooses</option>
+          <option value="document_scan">Document scan - even lighting, mild sharpening</option>
+          <option value="black_white">Black and white - high-contrast binary</option>
+          <option value="grayscale">Grayscale - minimal changes</option>
+        </select>
+        <div class="form-text mb-3">You can fine-tune every parameter in the next screen.</div>
+        <div class="form-check mb-4">
+          <input class="form-check-input" type="checkbox" id="run-ocr" checked>
+          <label class="form-check-label" for="run-ocr">Read the text after enhancing</label>
+        </div>
+
+        <div id="upload-progress" class="mb-3 d-none">
+          <div class="d-flex justify-content-between small mb-1"><span id="upload-progress-label">Uploading</span><span id="upload-progress-pct" class="tnum"></span></div>
+          <div class="progress" style="height:6px" role="progressbar" aria-label="Upload progress"><div class="progress-bar" id="upload-progress-bar" style="width:0%"></div></div>
+        </div>
+        <div id="submit-error" class="dv-notice dv-notice-bad mb-3 d-none" role="alert"></div>
+
+        <div class="d-grid gap-2">
+          <button type="button" class="btn btn-primary btn-lg" id="btn-process" disabled>Upload and process</button>
+          <button type="button" class="btn btn-outline-secondary" id="btn-upload-only" disabled>Upload only, then adjust corners first</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<%- include('partials/foot', { scripts: ['camera.js', 'upload.js'] }) %>

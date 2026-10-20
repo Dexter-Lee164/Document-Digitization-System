@@ -1,0 +1,30 @@
+<% if (locals.user) { %>
+<%- include('partials/head', { nav: '', crumbs: [] }) %>
+<div class="dv-empty">
+  <i class="bi bi-exclamation-diamond" aria-hidden="true"></i>
+  <h1 class="h4"><%= status === 404 ? 'We could not find that page' : 'That did not work' %></h1>
+  <p><%= message %></p>
+  <a class="btn btn-primary" href="/dashboard">Go to dashboard</a>
+</div>
+<%- include('partials/foot') %>
+<% } else { %><!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> - DocuVision</title>
+  <link rel="icon" href="/static/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="dv-body">
+<main class="dv-empty" style="padding-top:18vh">
+  <i class="bi bi-exclamation-diamond" aria-hidden="true"></i>
+  <h1 class="h4"><%= status === 404 ? 'We could not find that page' : 'That did not work' %></h1>
+  <p><%= message %></p>
+  <a class="btn btn-primary" href="/login">Go to sign in</a>
+</main>
+</body>
+</html>
+<% } %>

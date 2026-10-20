@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "description": "Single source of truth for processing parameters. Loaded by BOTH the Node.js backend (request validation, UI controls) and the Python CV service (pydantic validation, preset resolution).",
+  "parameters": {
+    "resize_mode": { "type": "enum", "values": ["none", "auto"], "default": "auto", "label": "Resolution", "help": "auto: upsample low-resolution pages (bicubic) toward the target size so OCR sees larger glyphs. Interpolation does not recover lost detail." },
+    "target_long_side": { "type": "int", "min": 1200, "max": 4000, "default": 2200, "label": "Target long side (px)" },
+    "shadow_removal": { "type": "bool", "default": true, "label": "Illumination / shadow correction" },
+    "denoise_method": { "type": "enum", "values": ["none", "gaussian", "median", "bilateral"], "default": "median", "label": "Noise reduction" },
+    "denoise_kernel": { "type": "int", "min": 3, "max": 9, "odd": true, "default": 3, "label": "Filter kernel size" },
+    "equalize": { "type": "bool", "default": false, "label": "Global histogram equalization" },
+    "clahe_clip": { "type": "float", "min": 0, "max": 8, "default": 2.0, "label": "Contrast (CLAHE clip limit)", "help": "0 disables CLAHE" },
+    "clahe_grid": { "type": "int", "min": 2, "max": 16, "default": 8, "label": "CLAHE tile grid" },
+    "sharpen_method": { "type": "enum", "values": ["none", "unsharp", "kernel"], "default": "unsharp", "label": "Sharpening" },
+    "sharpen_amount": { "type": "float", "min": 0, "max": 3, "default": 0.6, "label": "Sharpen amount" },
+    "threshold_method": { "type": "enum", "values": ["none", "otsu", "adaptive_gaussian"], "default": "none", "label": "Thresholding" },
+    "adaptive_block": { "type": "int", "min": 11, "max": 101, "odd": true, "default": 35, "label": "Adaptive block size" },
+    "adaptive_c": { "type": "int", "min": 0, "max": 30, "default": 12, "label": "Adaptive constant C" },
+    "morph_op": { "type": "enum", "values": ["none", "erode", "dilate", "open", "close"], "default": "none", "label": "Morphology" },
+    "morph_kernel": { "type": "int", "min": 1, "max": 5, "default": 2, "label": "Morphology kernel" },
+    "morph_iterations": { "type": "int", "min": 1, "max": 3, "default": 1, "label": "Morphology iterations" }
+  },
+  "presets": {
+    "automatic": {
+      "label": "Automatic",
+      "description": "Measures noise, contrast, blur and lighting of the page, then picks suitable settings.",
+      "adaptive": true,
+      "params": {}
+    },
+    "document_scan": {
+      "label": "Document Scan",
+      "description": "Flattens lighting, light denoise, CLAHE contrast and mild sharpening. Best for clean printed text.",
+      "adaptive": false,
+      "params": { "resize_mode": "auto", "shadow_removal": true, "denoise_method": "median", "denoise_kernel": 3, "equalize": false, "clahe_clip": 2.0, "clahe_grid": 8, "sharpen_method": "unsharp", "sharpen_amount": 0.6, "threshold_method": "none", "morph_op": "none" }
+    },
+    "black_white": {
+      "label": "Black and White",
+      "description": "High-contrast binary page using adaptive Gaussian thresholding after lighting correction.",
+      "adaptive": false,
+      "params": { "resize_mode": "auto", "shadow_removal": true, "denoise_method": "median", "denoise_kernel": 3, "equalize": false, "clahe_clip": 1.5, "clahe_grid": 8, "sharpen_method": "none", "sharpen_amount": 0, "threshold_method": "adaptive_gaussian", "adaptive_block": 35, "adaptive_c": 12, "morph_op": "none" }
+    },
+    "grayscale": {
+      "label": "Grayscale",
+      "description": "Plain grayscale conversion with very light smoothing; keeps intensity information untouched.",
+      "adaptive": false,
+      "params": { "resize_mode": "none", "shadow_removal": false, "denoise_method": "gaussian", "denoise_kernel": 3, "equalize": false, "clahe_clip": 0, "clahe_grid": 8, "sharpen_method": "none", "sharpen_amount": 0, "threshold_method": "none", "morph_op": "none" }
+    },
+    "custom": {
+      "label": "Custom",
+      "description": "Set every parameter yourself.",
+      "adaptive": false,
+      "params": {}
+    }
+  },
+  "geometry": {
+    "manual_rotation": { "type": "enum_int", "values": [0, 90, 180, 270], "default": 0 },
+    "manual_angle": { "type": "float", "min": -15, "max": 15, "default": 0 }
+  },
+  "ocr": {
+    "psm": { "type": "enum_int", "values": [3, 4, 6, 11], "default_general": 3, "default_form": 4 },
+    "low_confidence_threshold": 60
+  }
+}

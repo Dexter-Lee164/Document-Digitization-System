@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <title>Create account - DocuVision</title>
+  <link rel="icon" href="/static/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/auth.css">
+</head>
+<body class="dv-body">
+<div class="dv-auth">
+  <%- include('_side') %>
+  <main class="dv-auth-main" id="main">
+    <div class="dv-auth-card">
+      <h2>Create your account</h2>
+      <p class="lead-sm">Accounts are stored in a local database. Nothing is sent to an outside service.</p>
+      <% if (error) { %><div class="dv-notice dv-notice-bad mb-3" role="alert"><i class="bi bi-exclamation-octagon-fill" aria-hidden="true"></i><div><%= error %></div></div><% } %>
+      <form method="post" action="/auth/register" novalidate data-auth-form data-register>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <div class="mb-3">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-control" id="email" name="email" type="email" autocomplete="username" required autofocus value="<%= email %>">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-group">
+            <input class="form-control" id="password" name="password" type="password" autocomplete="new-password" required minlength="8" aria-describedby="pw-hint">
+            <button class="btn btn-outline-secondary" type="button" data-toggle-password aria-label="Show password" aria-pressed="false"><i class="bi bi-eye" aria-hidden="true"></i></button>
+          </div>
+          <div class="dv-pw-meter" aria-hidden="true"><span data-pw-meter></span></div>
+          <div class="dv-pw-hint" id="pw-hint">At least 8 characters with a letter and a number.</div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label" for="confirm_password">Confirm password</label>
+          <input class="form-control" id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required>
+        </div>
+        <button class="btn btn-primary" type="submit">Create account</button>
+      </form>
+      <p class="dv-auth-alt">Already registered? <a href="/login">Sign in</a></p>
+    </div>
+  </main>
+</div>
+<script src="/static/js/auth.js"></script>
+</body>
+</html>
