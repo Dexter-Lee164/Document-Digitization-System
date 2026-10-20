@@ -190,3 +190,5 @@ npm run check               # is Python, every Python package and Tesseract usab
 * Camera capture needs a secure context: use `http://localhost:3000` (or HTTPS), not a LAN address.
 * Everything is stored unencrypted on local disk; use full-disk encryption and OS accounts for protection. There is no e-mail verification or password reset by e-mail (the application is local).
 * Where it was tested: see INSTALLATION.md, "What has and has not been tested".
+#   T i t e  
+ 
